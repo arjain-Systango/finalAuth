@@ -1,0 +1,33 @@
+version: "3"
+
+services:
+  postgres:
+    image: postgres:latest
+    ports:
+      - "4321:5432"
+    env_file:
+      - ./.env
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: authdb
+    restart: always
+    volumes:
+      - shared_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./.env
+    depends_on:
+      - postgres
+    command: >
+      sh -c "npm run migration:run && npm start"
+    restart: always
+
+volumes:
+  shared_data:
